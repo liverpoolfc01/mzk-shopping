@@ -1,0 +1,29 @@
+/* Admin-specific overrides (admin layout styles are in style.css) */
+
+.admin-main h1.page-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: #333;
+}
+
+/* Make admin tables more compact on small screens */
+@media (max-width: 768px) {
+    .admin-sidebar { width: 60px; overflow: hidden; }
+    .admin-sidebar .sidebar-header { font-size: 14px; padding: 12px 8px; }
+    .admin-sidebar .sidebar-nav a { padding: 10px 8px; font-size: 16px; }
+    .admin-sidebar .sidebar-nav a span, .admin-sidebar .sidebar-section { display: none; }
+    .admin-main { padding: 12px; }
+}
+
+/* Form improvements for admin */
+.form-input, .form-select, .form-textarea {
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+    box-shadow: 0 0 0 2px rgba(228, 57, 60, 0.15);
+}
+
+/* Data table improvements */
+.data-table { overflow-x: auto; }
+.data-table table { min-width: 600px; }

@@ -1,3 +1,4 @@
+import os
 from flask import Flask
 from flask_login import LoginManager
 from app.config import Config
@@ -16,7 +17,11 @@ def load_user(user_id):
 
 
 def create_app():
-    app = Flask(__name__)
+    # Point static_folder to project root's static/ directory
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    static_dir = os.path.join(base_dir, 'static')
+
+    app = Flask(__name__, static_folder=static_dir, static_url_path='/static')
     app.config.from_object(Config)
 
     # Initialize extensions
@@ -24,19 +29,14 @@ def create_app():
     login_manager.init_app(app)
 
     # Ensure upload directory exists
-    import os
-    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    upload_dir = os.path.join(static_dir, 'uploads')
+    os.makedirs(upload_dir, exist_ok=True)
+    app.config['UPLOAD_FOLDER'] = upload_dir
 
-    # Create a placeholder image
-    placeholder_path = os.path.join(app.config['UPLOAD_FOLDER'], 'placeholder.png')
+    # Create a proper placeholder image if it doesn't exist
+    placeholder_path = os.path.join(upload_dir, 'placeholder.png')
     if not os.path.exists(placeholder_path):
-        # Create a simple 1-pixel PNG as placeholder
-        # Minimal valid PNG
-        png_data = (b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01'
-                    b'\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\x0cIDATx\x9cc\xf8\x0f'
-                    b'\x00\x00\x01\x01\x00\x05\x18\xd8N\x00\x00\x00\x00IEND\xaeB`\x82')
-        with open(placeholder_path, 'wb') as f:
-            f.write(png_data)
+        _create_placeholder(placeholder_path)
 
     # Register blueprints
     from app.routes.auth import auth_bp
@@ -66,3 +66,43 @@ def create_app():
         return dict(cart_count=cart_count)
 
     return app
+
+
+def _create_placeholder(path):
+    """Create a proper 200x200 gray placeholder PNG image."""
+    import struct
+    import zlib
+
+    width, height = 200, 200
+    # Create a simple gray gradient PNG
+
+    def create_png(w, h):
+        def chunk(chunk_type, data):
+            c = chunk_type + data
+            crc = struct.pack('>I', zlib.crc32(c) & 0xffffffff)
+            return struct.pack('>I', len(data)) + c + crc
+
+        # IHDR
+        ihdr_data = struct.pack('>IIBBBBB', w, h, 8, 2, 0, 0, 0)  # 8-bit RGB
+        ihdr = chunk(b'IHDR', ihdr_data)
+
+        # IDAT: gray pixels with "商品图片" text approximation
+        raw = b''
+        for y in range(h):
+            raw += b'\x00'  # filter byte
+            for x in range(w):
+                # Light gray background
+                r, g, b = 240, 240, 240
+                # Draw a simple border
+                if x < 2 or x >= w-2 or y < 2 or y >= h-2:
+                    r, g, b = 220, 220, 220
+                raw += struct.pack('BBB', r, g, b)
+
+        idat = chunk(b'IDAT', zlib.compress(raw))
+        iend = chunk(b'IEND', b'')
+
+        return b'\x89PNG\r\n\x1a\n' + ihdr + idat + iend
+
+    png_data = create_png(width, height)
+    with open(path, 'wb') as f:
+        f.write(png_data)
