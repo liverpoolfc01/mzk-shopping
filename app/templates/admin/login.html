@@ -2,13 +2,14 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>后台登录 - MZK商城</title>
+    <title>商家登录 - MZK商城</title>
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
 <div class="admin-login-page">
     <div class="admin-login-box">
-        <h2>🛒 MZK商城后台</h2>
+        <h2>🏪 商家登录</h2>
+        <p style="text-align:center;color:var(--text-muted);font-size:13px;margin-bottom:16px;">MZK商城 · 商家管理后台</p>
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for cat, msg in messages %}
@@ -18,16 +19,21 @@
         {% endwith %}
         <form method="POST">
             <div class="form-group">
-                <label class="form-label">用户名</label>
+                <label class="form-label">商家用户名</label>
                 <input type="text" name="username" class="form-input" placeholder="admin" required>
             </div>
             <div class="form-group">
                 <label class="form-label">密码</label>
                 <input type="password" name="password" class="form-input" placeholder="密码" required>
             </div>
-            <button type="submit" class="btn btn-primary btn-block btn-lg">登 录</button>
+            <button type="submit" class="btn btn-primary btn-block btn-lg">🏪 商家登录</button>
         </form>
-        <p style="text-align:center;margin-top:16px;"><a href="/" style="color:var(--primary);">← 返回前台</a></p>
+        <p style="text-align:center;margin-top:16px;">
+            还没有商家账号？<a href="/auth/merchant-register" style="color:var(--primary);">🏪 立即入驻</a>
+        </p>
+        <p style="text-align:center;margin-top:4px;">
+            <a href="/" style="color:var(--text-muted);font-size:13px;">← 返回商城首页</a>
+        </p>
     </div>
 </div>
 </body>

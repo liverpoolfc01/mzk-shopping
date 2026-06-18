@@ -23,10 +23,14 @@
                     <a href="/cart" class="cart-badge">
                         🛒<span class="badge" id="cart-badge">{{ cart_count }}</span>
                     </a>
+                    {% if current_user.role == 'admin' %}
+                    <a href="/admin" style="background:rgba(255,255,255,0.2);padding:4px 10px;border-radius:12px;">🏪 商家后台</a>
+                    {% endif %}
                     <a href="/auth/logout">退出</a>
                 {% else %}
                     <a href="/auth/login">登录</a>
                     <a href="/auth/register">注册</a>
+                    <a href="/admin/login" style="background:rgba(255,255,255,0.2);padding:4px 10px;border-radius:12px;">🏪 商家登录</a>
                 {% endif %}
             </nav>
         </div>

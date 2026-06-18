@@ -88,6 +88,54 @@ def register():
     return render_template('auth/register.html')
 
 
+@auth_bp.route('/auth/merchant-register', methods=['GET', 'POST'])
+def merchant_register():
+    """Merchant/商家 registration"""
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
+        password2 = request.form.get('password2', '')
+        phone = request.form.get('phone', '').strip()
+
+        if not username or not password:
+            flash('请填写用户名和密码', 'danger')
+            return render_template('auth/merchant_register.html')
+
+        if len(username) < 3 or len(username) > 50:
+            flash('用户名长度3-50个字符', 'danger')
+            return render_template('auth/merchant_register.html')
+
+        if password != password2:
+            flash('两次密码输入不一致', 'danger')
+            return render_template('auth/merchant_register.html')
+
+        if len(password) < 6:
+            flash('密码长度至少6位', 'danger')
+            return render_template('auth/merchant_register.html')
+
+        if User.query.filter_by(username=username).first():
+            flash('用户名已被注册', 'danger')
+            return render_template('auth/merchant_register.html')
+
+        user = User(
+            username=username,
+            password_hash=generate_password_hash(password),
+            phone=phone,
+            role='admin',
+            status=1,
+        )
+        db.session.add(user)
+        db.session.commit()
+
+        flash('商家注册成功！请登录商家后台', 'success')
+        return redirect(url_for('admin.login'))
+
+    return render_template('auth/merchant_register.html')
+
+
 @auth_bp.route('/auth/logout')
 def logout():
     logout_user()
