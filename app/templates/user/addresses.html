@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}收货地址 - MZK商城{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="flex-between" style="padding:12px 0;">
+        <h2>📍 收货地址</h2>
+        <button class="btn btn-primary btn-sm" onclick="showForm()">+ 添加地址</button>
+    </div>
+
+    <div id="address-list">
+        {% for addr in addresses %}
+        <div class="address-card" id="addr-{{ addr.id }}">
+            <div class="addr-header">
+                <span class="addr-name">{{ addr.receiver_name }}</span>
+                <span class="addr-phone">{{ addr.phone }}</span>
+            </div>
+            <div class="addr-detail">{{ addr.province }}{{ addr.city }}{{ addr.district }} {{ addr.detail }}</div>
+            <div style="margin-top:8px;display:flex;gap:6px;">
+                {% if addr.is_default %}<span class="addr-tag">默认</span>
+                {% else %}<button class="btn btn-sm btn-outline" onclick="setDefault({{ addr.id }})">设为默认</button>{% endif %}
+                <button class="btn btn-sm btn-outline" onclick="editAddress({{ addr.id }})">编辑</button>
+                <button class="btn btn-sm btn-outline" style="color:var(--danger);" onclick="deleteAddr({{ addr.id }})">删除</button>
+            </div>
+        </div>
+        {% endfor %}
+        {% if not addresses %}
+        <div class="card" style="text-align:center;padding:40px;">
+            <p style="font-size:48px;">📍</p><p style="color:var(--text-muted);">暂无地址</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Add/Edit Form (hidden by default) -->
+    <div id="addr-form" class="card" style="display:none;margin:12px 0 80px;position:sticky;bottom:60px;background:#fff;z-index:50;">
+        <div class="card-body">
+            <h4 id="form-title">添加收货地址</h4>
+            <input type="hidden" id="addr-id">
+            <div class="form-group"><label class="form-label">收件人 *</label><input class="form-input" id="receiver_name" placeholder="姓名"></div>
+            <div class="form-group"><label class="form-label">手机号 *</label><input class="form-input" id="phone" placeholder="手机号"></div>
+            <div class="form-group" style="display:flex;gap:8px;">
+                <div style="flex:1;"><label class="form-label">省</label><input class="form-input" id="province" placeholder="省"></div>
+                <div style="flex:1;"><label class="form-label">市</label><input class="form-input" id="city" placeholder="市"></div>
+                <div style="flex:1;"><label class="form-label">区</label><input class="form-input" id="district" placeholder="区"></div>
+            </div>
+            <div class="form-group"><label class="form-label">详细地址 *</label><input class="form-input" id="detail" placeholder="街道/门牌号"></div>
+            <div class="form-group"><label><input type="checkbox" id="is_default"> 设为默认地址</label></div>
+            <div style="display:flex;gap:8px;">
+                <button class="btn btn-primary" onclick="saveAddress()" style="flex:1;">保存</button>
+                <button class="btn btn-outline" onclick="hideForm()" style="flex:1;">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showForm(id) {
+    document.getElementById('addr-form').style.display = 'block';
+    document.getElementById('form-title').textContent = '添加收货地址';
+    document.getElementById('addr-id').value = '';
+    ['receiver_name','phone','province','city','district','detail'].forEach(f=>document.getElementById(f).value='');
+    document.getElementById('is_default').checked = false;
+}
+function hideForm() { document.getElementById('addr-form').style.display='none'; }
+function editAddress(id) {
+    const card = document.getElementById('addr-'+id);
+    document.getElementById('addr-form').style.display='block';
+    document.getElementById('form-title').textContent='编辑收货地址';
+    document.getElementById('addr-id').value=id;
+    document.getElementById('receiver_name').value=card.querySelector('.addr-name').textContent;
+    document.getElementById('phone').value=card.querySelector('.addr-phone').textContent;
+    const detail = card.querySelector('.addr-detail').textContent.trim();
+    document.getElementById('detail').value=detail;
+    document.getElementById('is_default').checked=!!card.querySelector('.addr-tag');
+    window.scrollTo({top:document.getElementById('addr-form').offsetTop-60,behavior:'smooth'});
+}
+function saveAddress() {
+    const id = document.getElementById('addr-id').value;
+    const data = {
+        receiver_name:document.getElementById('receiver_name').value,
+        phone:document.getElementById('phone').value,
+        province:document.getElementById('province').value,
+        city:document.getElementById('city').value,
+        district:document.getElementById('district').value,
+        detail:document.getElementById('detail').value,
+        is_default:document.getElementById('is_default').checked?1:0
+    };
+    const url = id ? '/user/address/edit/'+id : '/user/address/add';
+    fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
+        .then(r=>r.json()).then(d=>{alert(d.message);location.reload();});
+}
+function deleteAddr(id) { if(confirm('确认删除?')){ fetch('/user/address/delete/'+id,{method:'POST'}).then(r=>r.json()).then(d=>{alert(d.message);location.reload();}); } }
+function setDefault(id) { fetch('/user/address/default/'+id,{method:'POST'}).then(r=>r.json()).then(d=>{alert(d.message);location.reload();}); }
+</script>
+{% endblock %}

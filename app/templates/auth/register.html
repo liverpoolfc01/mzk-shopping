@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}注册 - MZK商城{% endblock %}
+{% block content %}
+<div style="max-width:400px;margin:40px auto;padding:0 16px;">
+    <div class="card"><div class="card-body">
+        <h2 style="text-align:center;margin-bottom:20px;">📝 用户注册</h2>
+        <form method="POST" action="/auth/register">
+            <div class="form-group">
+                <label class="form-label">用户名 <span style="color:var(--primary);">*</span></label>
+                <input type="text" name="username" class="form-input" placeholder="3-50个字符" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">邮箱</label>
+                <input type="email" name="email" class="form-input" placeholder="可选">
+            </div>
+            <div class="form-group">
+                <label class="form-label">手机号</label>
+                <input type="text" name="phone" class="form-input" placeholder="可选">
+            </div>
+            <div class="form-group">
+                <label class="form-label">密码 <span style="color:var(--primary);">*</span></label>
+                <input type="password" name="password" class="form-input" placeholder="至少6位" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">确认密码 <span style="color:var(--primary);">*</span></label>
+                <input type="password" name="password2" class="form-input" placeholder="再次输入密码" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block btn-lg">注 册</button>
+        </form>
+        <p style="text-align:center;margin-top:16px;">
+            已有账号？<a href="/auth/login" style="color:var(--primary);">立即登录</a>
+        </p>
+    </div></div>
+</div>
+{% endblock %}

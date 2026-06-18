@@ -1,0 +1,29 @@
+{% extends "base_admin.html" %}
+{% block title %}砍价管理 - MZK商城后台{% endblock %}
+{% block content %}
+<h1 class="page-title">🔪 砍价管理</h1>
+<div class="card mb-16"><div class="card-body">
+    <h4>创建砍价活动</h4>
+    <form onsubmit="createBargain(event)">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <div class="form-group" style="flex:2;"><label class="form-label">标题</label><input class="form-input" id="b-title" required></div>
+            <div class="form-group" style="flex:1;"><label class="form-label">商品</label><select class="form-select" id="b-product">{% for p in products %}<option value="{{ p.id }}">{{ p.name[:20] }}</option>{% endfor %}</select></div>
+            <div class="form-group" style="flex:1;"><label class="form-label">原价</label><input type="number" step="0.01" class="form-input" id="b-original" required></div>
+            <div class="form-group" style="flex:1;"><label class="form-label">底价</label><input type="number" step="0.01" class="form-input" id="b-floor" required></div>
+            <div class="form-group" style="flex:1;"><label class="form-label">最多帮砍</label><input type="number" class="form-input" id="b-helpers" value="10"></div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <div class="form-group" style="flex:1;"><label class="form-label">开始</label><input type="datetime-local" class="form-input" id="b-start" required></div>
+            <div class="form-group" style="flex:1;"><label class="form-label">结束</label><input type="datetime-local" class="form-input" id="b-end" required></div>
+        </div>
+        <button type="submit" class="btn btn-primary">创建砍价</button>
+    </form>
+</div></div>
+<div class="data-table"><table>
+    <thead><tr><th>ID</th><th>标题</th><th>商品</th><th>原价</th><th>底价</th><th>帮砍上限</th><th>有效期</th></tr></thead>
+    <tbody>{% for b in bargains %}<tr><td>{{ b.id }}</td><td>{{ b.title }}</td><td>{{ b.product.name[:20] }}</td><td>¥{{ '%.2f' % b.original_price }}</td><td>¥{{ '%.2f' % b.floor_price }}</td><td>{{ b.max_helpers }}</td><td>{{ b.start_time.strftime('%m-%d') }}~{{ b.end_time.strftime('%m-%d') }}</td></tr>{% endfor %}</tbody>
+</table></div>
+<script>
+function createBargain(e){ e.preventDefault(); const d={title:document.getElementById('b-title').value,product_id:document.getElementById('b-product').value,original_price:document.getElementById('b-original').value,floor_price:document.getElementById('b-floor').value,max_helpers:document.getElementById('b-helpers').value,start_time:document.getElementById('b-start').value,end_time:document.getElementById('b-end').value}; fetch('/admin/bargain/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}).then(r=>r.json()).then(d=>{alert(d.message);location.reload();}); }
+</script>
+{% endblock %}

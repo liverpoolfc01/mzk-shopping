@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}支付成功 - MZK商城{% endblock %}
+{% block content %}
+<div class="success-page">
+    <div class="success-icon">✅</div>
+    <h2>支付成功！</h2>
+    <p style="color:var(--text-muted);margin:8px 0;">订单号: {{ order.order_no }}</p>
+    <p style="color:var(--text-muted);">实付金额: <strong class="price price-xl">¥{{ '%.2f' % order.pay_amount }}</strong></p>
+    <div style="margin-top:24px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <a href="/order/detail/{{ order.id }}" class="btn btn-outline">查看订单</a>
+        <a href="/order/list" class="btn btn-outline">我的订单</a>
+        <a href="/" class="btn btn-primary">继续购物</a>
+    </div>
+</div>
+{% endblock %}

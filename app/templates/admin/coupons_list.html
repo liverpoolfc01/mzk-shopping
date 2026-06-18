@@ -1,0 +1,44 @@
+{% extends "base_admin.html" %}
+{% block title %}优惠券管理 - MZK商城后台{% endblock %}
+{% block content %}
+<h1 class="page-title">🎫 优惠券管理</h1>
+<div class="card mb-16"><div class="card-body">
+    <h4>创建优惠券</h4>
+    <form id="coupon-form" onsubmit="createCoupon(event)">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <div class="form-group" style="flex:1;min-width:120px;"><label class="form-label">名称</label><input class="form-input" id="c-name" required></div>
+            <div class="form-group" style="flex:1;min-width:100px;"><label class="form-label">类型</label><select class="form-select" id="c-type"><option value="fixed">固定金额</option><option value="percent">百分比</option></select></div>
+            <div class="form-group" style="flex:1;min-width:80px;"><label class="form-label">面值</label><input type="number" step="0.01" class="form-input" id="c-value" required></div>
+            <div class="form-group" style="flex:1;min-width:100px;"><label class="form-label">最低消费</label><input type="number" step="0.01" class="form-input" id="c-min" value="0"></div>
+            <div class="form-group" style="flex:1;min-width:100px;"><label class="form-label">总数</label><input type="number" class="form-input" id="c-count" value="100"></div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <div class="form-group" style="flex:1;"><label class="form-label">开始时间</label><input type="datetime-local" class="form-input" id="c-start" required></div>
+            <div class="form-group" style="flex:1;"><label class="form-label">结束时间</label><input type="datetime-local" class="form-input" id="c-end" required></div>
+        </div>
+        <button type="submit" class="btn btn-primary">创建优惠券</button>
+    </form>
+</div></div>
+
+<div class="data-table"><table>
+    <thead><tr><th>ID</th><th>名称</th><th>类型</th><th>面值</th><th>最低消费</th><th>已领/总数</th><th>有效期</th><th>状态</th><th>操作</th></tr></thead>
+    <tbody>
+        {% for c in coupons %}
+        <tr>
+            <td>{{ c.id }}</td><td>{{ c.name }}</td>
+            <td>{% if c.type=='fixed' %}固定{% else %}百分比{% endif %}</td>
+            <td>{% if c.type=='fixed' %}¥{{ '%.0f' % c.value }}{% else %}{{ '%.0f' % c.value }}%{% endif %}</td>
+            <td>¥{{ '%.0f' % c.min_amount }}</td>
+            <td>{{ c.used_count }}/{{ c.total_count }}</td>
+            <td>{{ c.start_time.strftime('%m-%d') }} ~ {{ c.end_time.strftime('%m-%d') }}</td>
+            <td>{% if c.status==1 %}<span style="color:var(--success);">启用</span>{% else %}<span style="color:var(--danger);">停用</span>{% endif %}</td>
+            <td><button class="btn btn-sm btn-outline" style="color:var(--danger);" onclick="delCoupon({{ c.id }})">删除</button></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table></div>
+<script>
+function createCoupon(e){ e.preventDefault(); const d={name:document.getElementById('c-name').value,type:document.getElementById('c-type').value,value:document.getElementById('c-value').value,min_amount:document.getElementById('c-min').value,total_count:document.getElementById('c-count').value,start_time:document.getElementById('c-start').value,end_time:document.getElementById('c-end').value}; fetch('/admin/coupons/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}).then(r=>r.json()).then(d=>{alert(d.message);location.reload();}); }
+function delCoupon(id){ if(confirm('删除?')){ fetch('/admin/coupons/delete/'+id,{method:'POST'}).then(r=>r.json()).then(d=>{alert(d.message);location.reload();}); } }
+</script>
+{% endblock %}

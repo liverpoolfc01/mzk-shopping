@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}{{ gb.title }} - MZK商城{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="marketing-card">
+        <img src="{{ gb.product.get_main_image() }}" class="card-img" alt="{{ gb.product.name }}">
+        <div class="card-body">
+            <h3>{{ gb.title }}</h3>
+            <p class="text-muted mt-8">{{ gb.product.name }}</p>
+            <div style="display:flex;align-items:baseline;gap:8px;margin:10px 0;">
+                <span class="price price-xl">¥{{ '%.2f' % gb.group_price }}</span>
+                <span class="original-price" style="font-size:16px;">¥{{ '%.2f' % gb.product.price }}</span>
+                <span class="tag">{{ gb.required_count }}人成团</span>
+            </div>
+            <p class="text-sm text-muted">活动时间: {{ gb.start_time.strftime('%m-%d %H:%M') }} - {{ gb.end_time.strftime('%m-%d %H:%M') }}</p>
+            <p class="text-sm text-muted">成团限时: {{ gb.duration_hours }}小时</p>
+        </div>
+    </div>
+
+    <!-- Forming Groups -->
+    {% if forming_groups %}
+    <h4 style="margin:12px 0;">正在拼团的小队</h4>
+    {% for group in forming_groups %}
+    <div class="order-card">
+        <div class="flex-between mb-8">
+            <span><strong>{{ group.leader.username }}</strong> 发起的团</span>
+            <span class="text-sm text-muted">{{ group.current_count }}/{{ gb.required_count }}人</span>
+        </div>
+        <div class="progress-bar mb-8">
+            <div class="progress-fill" style="width:{{ (group.current_count / gb.required_count * 100)|int }}%;"></div>
+        </div>
+        <div class="flex-between">
+            <span class="text-sm text-muted">剩余 {{ ((group.expire_time - now).total_seconds() // 60)|int }} 分钟</span>
+            {% if current_user.is_authenticated and group.leader_user_id != current_user.id %}
+            <button class="btn btn-primary btn-sm" onclick="joinGroup({{ group.id }})">加入拼团</button>
+            {% elif not current_user.is_authenticated %}
+            <a href="/auth/login" class="btn btn-primary btn-sm">登录后加入</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Create Group -->
+    {% if current_user.is_authenticated %}
+    <button class="btn btn-primary btn-block btn-lg mt-16" onclick="createGroup({{ gb.id }})" style="margin-bottom:60px;">
+        🚀 发起拼团 ¥{{ '%.2f' % gb.group_price }}
+    </button>
+    {% else %}
+    <a href="/auth/login" class="btn btn-primary btn-block btn-lg mt-16" style="margin-bottom:60px;">登录参与拼团</a>
+    {% endif %}
+</div>
+
+<script>
+function createGroup(id){ fetch('/group-buy/'+id+'/create-group',{method:'POST'}).then(r=>r.json()).then(d=>{alert(d.message);location.reload();}); }
+function joinGroup(id){ fetch('/group-buy/'+id+'/join',{method:'POST'}).then(r=>r.json()).then(d=>{alert(d.message);location.reload();}); }
+</script>
+{% endblock %}

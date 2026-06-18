@@ -1,0 +1,28 @@
+{% extends "base_admin.html" %}
+{% block title %}抽奖管理 - MZK商城后台{% endblock %}
+{% block content %}
+<h1 class="page-title">🎰 抽奖管理</h1>
+<div class="card mb-16"><div class="card-body">
+    <h4>创建抽奖活动</h4>
+    <form onsubmit="createLottery(event)">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <div class="form-group" style="flex:2;"><label class="form-label">标题</label><input class="form-input" id="l-title" required></div>
+            <div class="form-group" style="flex:1;"><label class="form-label">每日次数</label><input type="number" class="form-input" id="l-daily" value="1"></div>
+        </div>
+        <div class="form-group"><label class="form-label">描述</label><input class="form-input" id="l-desc"></div>
+        <div class="form-group"><label class="form-label">奖品配置 (JSON) 示例: [{"name":"iPhone","count":1,"prob":0.01},{"name":"谢谢参与","count":9999,"prob":0.99}]</label><textarea class="form-textarea" id="l-prizes" rows="4">[{"name":"iPhone 15","count":1,"prob":0.01},{"name":"50元券","count":50,"prob":0.09},{"name":"20元券","count":100,"prob":0.15},{"name":"10元券","count":200,"prob":0.25},{"name":"谢谢参与","count":9999,"prob":0.50}]</textarea></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <div class="form-group" style="flex:1;"><label class="form-label">开始</label><input type="datetime-local" class="form-input" id="l-start" required></div>
+            <div class="form-group" style="flex:1;"><label class="form-label">结束</label><input type="datetime-local" class="form-input" id="l-end" required></div>
+        </div>
+        <button type="submit" class="btn btn-primary">创建抽奖</button>
+    </form>
+</div></div>
+<div class="data-table"><table>
+    <thead><tr><th>ID</th><th>标题</th><th>每日限制</th><th>有效期</th><th>状态</th></tr></thead>
+    <tbody>{% for l in lotteries %}<tr><td>{{ l.id }}</td><td>{{ l.title }}</td><td>{{ l.daily_limit }}次</td><td>{{ l.start_time.strftime('%m-%d') }}~{{ l.end_time.strftime('%m-%d') }}</td><td>{% if l.status==1 %}进行中{% else %}已结束{% endif %}</td></tr>{% endfor %}</tbody>
+</table></div>
+<script>
+function createLottery(e){ e.preventDefault(); const d={title:document.getElementById('l-title').value,description:document.getElementById('l-desc').value,daily_limit:document.getElementById('l-daily').value,prizes:document.getElementById('l-prizes').value,start_time:document.getElementById('l-start').value,end_time:document.getElementById('l-end').value}; fetch('/admin/lottery/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}).then(r=>r.json()).then(d=>{alert(d.message);location.reload();}); }
+</script>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}砍价 - MZK商城{% endblock %}
+{% block content %}
+<div class="container">
+    <h2 style="padding:12px 0;">🔪 砍价免费拿</h2>
+    {% for bargain in bargains %}
+    <a href="/bargain/{{ bargain.id }}" class="marketing-card" style="display:block;">
+        <img src="{{ bargain.product.get_main_image() }}" class="card-img" alt="{{ bargain.product.name }}">
+        <div class="card-body">
+            <div class="card-title">{{ bargain.title }}</div>
+            <div class="card-subtitle">{{ bargain.product.name }}</div>
+            <div class="flex-between">
+                <div><span class="text-muted text-sm">原价</span> <span class="price" style="text-decoration:line-through;">¥{{ '%.2f' % bargain.original_price }}</span></div>
+                <div><span class="text-muted text-sm">底价</span> <span class="price price-lg">¥{{ '%.2f' % bargain.floor_price }}</span></div>
+            </div>
+            <span class="tag mt-8">最多{{ bargain.max_helpers }}人帮砍</span>
+        </div>
+    </a>
+    {% endfor %}
+    {% if not bargains %}
+    <div class="card" style="text-align:center;padding:40px;"><p style="font-size:48px;">🔪</p><p class="text-muted">暂无砍价活动</p></div>
+    {% endif %}
+</div>
+{% endblock %}

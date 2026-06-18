@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}{{ bargain.title }} - MZK商城{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="marketing-card">
+        <img src="{{ bargain.product.get_main_image() }}" class="card-img" alt="{{ bargain.product.name }}">
+        <div class="card-body">
+            <h3>{{ bargain.title }}</h3>
+            <p class="text-muted mt-8">{{ bargain.product.name }}</p>
+            <div class="flex-between mt-12">
+                <div><span class="text-muted text-sm">原价</span><br><span class="price" style="text-decoration:line-through;font-size:18px;">¥{{ '%.2f' % bargain.original_price }}</span></div>
+                <div style="text-align:center;"><span class="text-muted text-sm">当前价</span><br><span class="price price-xl" id="current-price">¥{{ '%.2f' % (record.current_price if record else bargain.original_price) }}</span></div>
+                <div style="text-align:right;"><span class="text-muted text-sm">底价</span><br><span class="price price-lg" style="color:var(--success);">¥{{ '%.2f' % bargain.floor_price }}</span></div>
+            </div>
+            {% if record %}
+            <p class="text-sm text-muted mt-8">已砍 {{ record.helper_count }}/{{ record.max_helpers }} 次</p>
+            <div class="progress-bar"><div class="progress-fill" style="width:{{ (record.helper_count / record.max_helpers * 100)|int }}%;"></div></div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if current_user.is_authenticated %}
+    {% if record and record.status == 'bargaining' %}
+    <div class="card mt-12"><div class="card-body" style="text-align:center;">
+        <p class="text-muted mb-8">分享链接邀请好友帮砍</p>
+        <button class="btn btn-primary btn-lg" onclick="buyBargain({{ record.id }})">¥<span id="buy-price">{{ '%.2f' % record.current_price }}</span> 直接购买</button>
+    </div></div>
+    {% else %}
+    <button class="btn btn-primary btn-block btn-lg mt-12" onclick="startBargain({{ bargain.id }})">🔪 开始砍价</button>
+    {% endif %}
+    {% else %}
+    <a href="/auth/login" class="btn btn-primary btn-block btn-lg mt-12">登录参与砍价</a>
+    {% endif %}
+</div>
+
+<script>
+function startBargain(id){ fetch('/bargain/'+id+'/start',{method:'POST'}).then(r=>r.json()).then(d=>{alert(d.message);location.reload();}); }
+function buyBargain(id){ if(confirm('确认以当前价格购买?')){ fetch('/bargain/'+id+'/buy',{method:'POST'}).then(r=>r.json()).then(d=>{alert(d.message);if(d.success)window.location.href='/order/pay/'+d.order_id;}); } }
+</script>
+{% endblock %}

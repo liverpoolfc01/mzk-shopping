@@ -1,0 +1,30 @@
+{% extends "base_admin.html" %}
+{% block title %}仪表盘 - MZK商城后台{% endblock %}
+{% block content %}
+<h1 class="page-title">📊 仪表盘</h1>
+<div class="stats-grid">
+    <div class="stat-card"><div class="stat-value">{{ total_products }}</div><div class="stat-label">商品总数</div></div>
+    <div class="stat-card"><div class="stat-value">{{ total_orders }}</div><div class="stat-label">订单总数</div></div>
+    <div class="stat-card"><div class="stat-value">{{ total_users }}</div><div class="stat-label">用户总数</div></div>
+    <div class="stat-card"><div class="stat-value">¥{{ '%.2f' % total_revenue }}</div><div class="stat-label">总营收</div></div>
+</div>
+<div class="card">
+    <div class="card-header">📋 最近订单</div>
+    <div class="data-table">
+        <table>
+            <thead><tr><th>订单号</th><th>用户ID</th><th>金额</th><th>状态</th><th>时间</th></tr></thead>
+            <tbody>
+                {% for o in recent_orders %}
+                <tr>
+                    <td><a href="/admin/orders/{{ o.id }}" style="color:var(--primary);">{{ o.order_no }}</a></td>
+                    <td>{{ o.user_id }}</td>
+                    <td>¥{{ '%.2f' % o.pay_amount }}</td>
+                    <td><span class="status-tag status-{{ o.status }}">{% if o.status=='pending_pay' %}待付款{% elif o.status=='pending_ship' %}待发货{% elif o.status=='shipped' %}已发货{% elif o.status=='completed' %}已完成{% else %}{{ o.status }}{% endif %}</span></td>
+                    <td>{{ o.created_at.strftime('%m-%d %H:%M') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

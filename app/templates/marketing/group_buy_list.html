@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}拼团 - MZK商城{% endblock %}
+{% block content %}
+<div class="container">
+    <h2 style="padding:12px 0;">👥 拼团活动</h2>
+    {% if group_buys %}
+    {% for gb in group_buys %}
+    <a href="/group-buy/{{ gb.id }}" class="marketing-card" style="display:block;">
+        <img src="{{ gb.product.get_main_image() }}" class="card-img" alt="{{ gb.product.name }}">
+        <div class="card-body">
+            <div class="card-title">{{ gb.title }}</div>
+            <div class="card-subtitle">{{ gb.product.name }}</div>
+            <div style="display:flex;align-items:baseline;gap:8px;">
+                <span class="price price-lg">¥{{ '%.2f' % gb.group_price }}</span>
+                <span class="original-price" style="font-size:14px;">¥{{ '%.2f' % gb.product.price }}</span>
+                <span class="tag">{{ gb.required_count }}人团</span>
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+    {% else %}
+    <div class="card" style="text-align:center;padding:40px;"><p style="font-size:48px;">👥</p><p style="color:var(--text-muted);">暂无拼团活动</p></div>
+    {% endif %}
+</div>
+{% endblock %}

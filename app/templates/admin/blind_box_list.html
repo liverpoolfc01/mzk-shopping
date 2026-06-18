@@ -1,0 +1,29 @@
+{% extends "base_admin.html" %}
+{% block title %}盲盒管理 - MZK商城后台{% endblock %}
+{% block content %}
+<h1 class="page-title">🎁 盲盒管理</h1>
+<div class="card mb-16"><div class="card-body">
+    <h4>创建盲盒活动</h4>
+    <form onsubmit="createBB(event)">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <div class="form-group" style="flex:2;"><label class="form-label">标题</label><input class="form-input" id="bb-title" required></div>
+            <div class="form-group" style="flex:1;"><label class="form-label">价格</label><input type="number" step="0.01" class="form-input" id="bb-price" required></div>
+            <div class="form-group" style="flex:1;"><label class="form-label">总数量</label><input type="number" class="form-input" id="bb-count" value="100"></div>
+        </div>
+        <div class="form-group"><label class="form-label">描述</label><input class="form-input" id="bb-desc"></div>
+        <div class="form-group"><label class="form-label">内容配置 (JSON) [{"name":"特等奖","prob":0.05},{"name":"一等奖","prob":0.15}...]</label><textarea class="form-textarea" id="bb-contents" rows="3">[{"name":"特等奖 - iPhone","prob":0.02},{"name":"一等奖 - 耳机","prob":0.08},{"name":"二等奖 - 优惠券50元","prob":0.15},{"name":"三等奖 - 优惠券10元","prob":0.25},{"name":"参与奖 - 小礼品","prob":0.50}]</textarea></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <div class="form-group" style="flex:1;"><label class="form-label">开始</label><input type="datetime-local" class="form-input" id="bb-start" required></div>
+            <div class="form-group" style="flex:1;"><label class="form-label">结束</label><input type="datetime-local" class="form-input" id="bb-end" required></div>
+        </div>
+        <button type="submit" class="btn btn-primary">创建盲盒</button>
+    </form>
+</div></div>
+<div class="data-table"><table>
+    <thead><tr><th>ID</th><th>标题</th><th>价格</th><th>已售/总数</th><th>有效期</th><th>状态</th></tr></thead>
+    <tbody>{% for b in boxes %}<tr><td>{{ b.id }}</td><td>{{ b.title }}</td><td>¥{{ '%.2f' % b.price }}</td><td>{{ b.sold_count }}/{{ b.total_count }}</td><td>{{ b.start_time.strftime('%m-%d') }}~{{ b.end_time.strftime('%m-%d') }}</td><td>{% if b.status==1 %}进行中{% else %}已结束{% endif %}</td></tr>{% endfor %}</tbody>
+</table></div>
+<script>
+function createBB(e){ e.preventDefault(); const d={title:document.getElementById('bb-title').value,description:document.getElementById('bb-desc').value,price:document.getElementById('bb-price').value,total_count:document.getElementById('bb-count').value,contents:document.getElementById('bb-contents').value,start_time:document.getElementById('bb-start').value,end_time:document.getElementById('bb-end').value}; fetch('/admin/blind-box/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}).then(r=>r.json()).then(d=>{alert(d.message);location.reload();}); }
+</script>
+{% endblock %}

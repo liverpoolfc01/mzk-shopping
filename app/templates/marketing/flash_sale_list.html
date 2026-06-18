@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}秒杀 - MZK商城{% endblock %}
+{% block content %}
+<div class="container">
+    <h2 style="padding:12px 0;">⚡ 限时秒杀</h2>
+    {% if ongoing %}
+    <h4 style="margin-bottom:8px;">🔥 正在秒杀</h4>
+    {% for fs in ongoing %}
+    <a href="/products/{{ fs.product_id }}" class="marketing-card" style="display:block;">
+        <img src="{{ fs.product.get_main_image() }}" class="card-img" alt="{{ fs.product.name }}">
+        <div class="card-body">
+            <div class="card-title">{{ fs.title }}</div>
+            <div style="display:flex;align-items:baseline;gap:8px;">
+                <span class="price price-lg">¥{{ '%.2f' % fs.flash_price }}</span>
+                <span class="original-price">¥{{ '%.2f' % fs.product.price }}</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width:{{ fs.stock * 100 // 20 }}%;"></div></div>
+            <div class="flex-between"><span class="text-sm text-muted">剩余 {{ fs.stock }} 件</span><span class="tag">限购{{ fs.limit_per_user }}件</span></div>
+            <p class="text-sm text-muted mt-8">截止 {{ fs.end_time.strftime('%m-%d %H:%M') }}</p>
+        </div>
+    </a>
+    {% endfor %}
+    {% endif %}
+    {% if upcoming %}
+    <h4 style="margin:12px 0 8px;">⏰ 即将开始</h4>
+    {% for fs in upcoming %}
+    <div class="marketing-card">
+        <img src="{{ fs.product.get_main_image() }}" class="card-img" alt="{{ fs.product.name }}">
+        <div class="card-body">
+            <div class="card-title">{{ fs.title }}</div>
+            <p class="countdown">开始: {{ fs.start_time.strftime('%m-%d %H:%M') }}</p>
+            <p class="price price-lg">¥{{ '%.2f' % fs.flash_price }}</p>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% if not ongoing and not upcoming %}
+    <div class="card" style="text-align:center;padding:40px;"><p style="font-size:48px;">⚡</p><p class="text-muted">暂无秒杀活动</p></div>
+    {% endif %}
+</div>
+{% endblock %}

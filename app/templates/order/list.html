@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}我的订单 - MZK商城{% endblock %}
+{% block content %}
+<div class="container">
+    <h2 style="padding:12px 0;">📋 我的订单</h2>
+
+    <!-- Status Tabs -->
+    <div class="flex gap-8" style="overflow-x:auto;padding-bottom:8px;">
+        <a href="/order/list" class="btn btn-sm {% if not current_status %}btn-primary{% else %}btn-outline{% endif %}">全部</a>
+        <a href="/order/list?status=pending_pay" class="btn btn-sm {% if current_status=='pending_pay' %}btn-primary{% else %}btn-outline{% endif %}">待付款</a>
+        <a href="/order/list?status=pending_ship" class="btn btn-sm {% if current_status=='pending_ship' %}btn-primary{% else %}btn-outline{% endif %}">待发货</a>
+        <a href="/order/list?status=shipped" class="btn btn-sm {% if current_status=='shipped' %}btn-primary{% else %}btn-outline{% endif %}">待收货</a>
+        <a href="/order/list?status=completed" class="btn btn-sm {% if current_status=='completed' %}btn-primary{% else %}btn-outline{% endif %}">已完成</a>
+    </div>
+
+    {% if orders %}
+    <div style="margin-bottom:60px;">
+        {% for order in orders %}
+        <div class="order-card">
+            <div class="order-header">
+                <span><strong>订单号:</strong> {{ order.order_no }}</span>
+                <span class="status-tag status-{{ order.status }}">
+                    {% if order.status == 'pending_pay' %}待付款
+                    {% elif order.status == 'pending_ship' %}待发货
+                    {% elif order.status == 'shipped' %}待收货
+                    {% elif order.status == 'completed' %}已完成
+                    {% elif order.status == 'cancelled' %}已取消
+                    {% elif order.status == 'refunding' %}退款中
+                    {% elif order.status == 'refunded' %}已退款
+                    {% endif %}
+                </span>
+            </div>
+            {% for item in order.items %}
+            <div class="order-product" style="padding:8px 0;">
+                <img src="{{ item.product.main_image or '/static/uploads/placeholder.png' }}" alt="">
+                <div style="flex:1;">
+                    <div style="font-size:13px;">{{ item.get_snapshot().get('name', '商品') }}</div>
+                    <div class="text-sm text-muted">¥{{ '%.2f' % item.price }} × {{ item.quantity }}</div>
+                </div>
+            </div>
+            {% endfor %}
+            <div style="text-align:right;padding-top:8px;border-top:1px solid var(--border);margin-top:4px;">
+                <span style="font-size:13px;">共{{ order.items.count() }}件 · 实付: </span>
+                <strong class="price">¥{{ '%.2f' % order.pay_amount }}</strong>
+                <span class="text-sm text-muted"> · {{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                <div style="margin-top:8px;">
+                    <a href="/order/detail/{{ order.id }}" class="btn btn-sm btn-outline">查看详情</a>
+                    {% if order.status == 'pending_pay' %}
+                    <a href="/order/pay/{{ order.id }}" class="btn btn-sm btn-primary" style="margin-left:6px;">去支付</a>
+                    <button class="btn btn-sm btn-outline" style="margin-left:6px;" onclick="cancelOrder({{ order.id }})">取消</button>
+                    {% elif order.status == 'shipped' %}
+                    <button class="btn btn-sm btn-primary" style="margin-left:6px;" onclick="confirmReceipt({{ order.id }})">确认收货</button>
+                    {% elif order.status in ('pending_ship', 'shipped') %}
+                    <button class="btn btn-sm btn-outline" style="margin-left:6px;" onclick="requestRefund({{ order.id }})">申请退款</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card" style="text-align:center;padding:60px 20px;">
+        <p style="font-size:48px;">📋</p>
+        <p style="color:var(--text-muted);">暂无订单</p>
+        <a href="/products" class="btn btn-primary mt-16">去购物</a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function cancelOrder(id){ if(confirm('确定取消订单?')){ fetch('/order/cancel/'+id,{method:'POST'}).then(r=>r.json()).then(d=>{alert(d.message);location.reload();}); } }
+function confirmReceipt(id){ if(confirm('确认已收到商品?')){ fetch('/order/confirm/'+id,{method:'POST'}).then(r=>r.json()).then(d=>{alert(d.message);location.reload();}); } }
+function requestRefund(id){ if(confirm('确定申请退款?')){ fetch('/order/refund/'+id,{method:'POST'}).then(r=>r.json()).then(d=>{alert(d.message);location.reload();}); } }
+</script>
+{% endblock %}

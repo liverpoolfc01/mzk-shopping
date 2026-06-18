@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}{{ box.title }} - MZK商城{% endblock %}
+{% block content %}
+<div class="container" style="text-align:center;">
+    <h2 style="padding:12px 0;">{{ box.title }}</h2>
+    <p class="text-muted">{{ box.description }}</p>
+    <div class="blind-box-img" id="box-img" onclick="openBox({{ box.id }})" style="width:160px;height:160px;font-size:48px;">🎁</div>
+    <p class="text-sm text-muted mt-8">点击打开盲盒</p>
+    <p class="price price-xl mt-8">¥{{ '%.2f' % box.price }} / 次</p>
+    <p class="text-sm text-muted">剩余 {{ remaining }}/{{ box.total_count }}</p>
+    <div id="result" style="display:none;margin:12px;"></div>
+
+    {% if not current_user.is_authenticated %}
+    <a href="/auth/login" class="btn btn-primary mt-16">登录后开盒</a>
+    {% endif %}
+</div>
+
+<script>
+function openBox(id) {
+    {% if not current_user.is_authenticated %}alert('请先登录');return;{% endif %}
+    const img = document.getElementById('box-img');
+    img.classList.add('shaking');
+    img.textContent = '🎲';
+    fetch('/blind-box/'+id+'/open',{method:'POST'})
+    .then(r=>r.json()).then(d=>{
+        setTimeout(()=>{
+            img.classList.remove('shaking');
+            img.textContent = d.success ? '🎉' : '❌';
+            const result = document.getElementById('result');
+            result.style.display = 'block';
+            if(d.success){
+                result.innerHTML = '<div class="card" style="border:2px solid var(--primary);animation:slideDown 0.3s ease;"><div class="card-body"><p style="font-size:48px;">🎉</p><h3>恭喜获得</h3><p class="price price-xl mt-8">'+d.prize+'</p></div></div>';
+            } else {
+                result.innerHTML = '<p class="text-muted">'+d.message+'</p>';
+            }
+        }, 1000);
+    });
+}
+</script>
+{% endblock %}

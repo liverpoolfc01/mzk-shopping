@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}抽奖 - MZK商城{% endblock %}
+{% block content %}
+<div class="container">
+    <h2 style="padding:12px 0;">🎰 幸运抽奖</h2>
+    {% for lottery in lotteries %}
+    <a href="/lottery/{{ lottery.id }}" class="marketing-card" style="display:block;">
+        <div class="card-body" style="text-align:center;padding:24px;">
+            <div class="lottery-wheel" style="width:120px;height:120px;margin:0 auto 12px;">
+                <span style="font-size:40px;">🎰</span>
+            </div>
+            <div class="card-title">{{ lottery.title }}</div>
+            <div class="card-subtitle">{{ lottery.description[:50] }}</div>
+            <span class="tag" style="background:var(--secondary);">{{ '免费' if lottery.cost_type == 'free' else lottery.cost_amount|string+'积分' }}</span>
+        </div>
+    </a>
+    {% endfor %}
+    {% if not lotteries %}
+    <div class="card" style="text-align:center;padding:40px;"><p style="font-size:48px;">🎰</p><p style="color:var(--text-muted);">暂无抽奖活动</p></div>
+    {% endif %}
+</div>
+{% endblock %}

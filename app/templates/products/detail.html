@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }} - MZK商城{% endblock %}
+{% block content %}
+<div class="product-detail">
+    <div class="detail-images">
+        <img src="{{ product.get_main_image() }}" alt="{{ product.name }}" style="width:100%;aspect-ratio:1;object-fit:cover;">
+    </div>
+    <div class="detail-info">
+        <h1 class="detail-name">{{ product.name }}</h1>
+        <div class="detail-price-row">
+            <span class="price price-xl">¥{{ '%.2f' % product.price }}</span>
+            {% if product.original_price and product.original_price > product.price %}
+            <span class="original-price" style="font-size:16px;">¥{{ '%.2f' % product.original_price }}</span>
+            <span class="tag" style="background:var(--success)">省{{ '%.0f' % (100*(1 - product.price/product.original_price)) }}%</span>
+            {% endif %}
+        </div>
+        <p class="text-muted text-sm">库存: {{ product.stock }}件 | 已售: {{ product.sales_count }}件</p>
+        <div class="detail-desc mt-12">{{ product.description }}</div>
+        <p class="text-muted text-sm mt-8">分类: {{ product.category.name if product.category else '未分类' }}</p>
+    </div>
+
+    <!-- Related Products -->
+    {% if related %}
+    <div class="container" style="margin:12px 0;">
+        <h3 style="font-size:15px;margin-bottom:8px;">相关推荐</h3>
+        <div class="product-grid">
+            {% for p in related %}
+            <a href="/products/{{ p.id }}" class="product-card">
+                <img src="{{ p.get_main_image() }}" class="card-img" alt="{{ p.name }}">
+                <div class="card-info">
+                    <div class="card-name">{{ p.name }}</div>
+                    <div class="card-bottom">
+                        <span class="card-price">¥{{ '%.2f' % p.price }}</span>
+                        <span class="card-sold">已售{{ p.sales_count }}</span>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Bottom buy bar -->
+<div class="detail-bottom-bar">
+    <a href="/cart" style="position:relative;font-size:24px;display:flex;align-items:center;">
+        🛒<span class="badge" id="cart-badge-bottom" style="position:absolute;top:-6px;right:-8px;background:var(--primary);color:#fff;border-radius:50%;min-width:16px;height:16px;font-size:10px;display:flex;align-items:center;justify-content:center;{{ 'display:none' if cart_count == 0 else '' }}">{{ cart_count }}</span>
+    </a>
+    {% if current_user.is_authenticated %}
+    <button class="btn btn-outline" onclick="addToCart({{ product.id }})" id="btn-cart">加入购物车</button>
+    <button class="btn btn-primary" onclick="buyNow({{ product.id }})">立即购买</button>
+    {% else %}
+    <a href="/auth/login" class="btn btn-primary" style="flex:1;">登录后购买</a>
+    {% endif %}
+</div>
+
+<div style="height:100px;"></div>
+
+<script>
+function addToCart(productId) {
+    fetch('/cart/add', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({product_id:productId,quantity:1})
+    }).then(r=>r.json()).then(d=>{
+        alert(d.message);
+        if(d.success && d.cart_count !== undefined){
+            document.querySelectorAll('#cart-badge, #cart-badge-bottom').forEach(el=>{
+                el.textContent = d.cart_count;
+                el.style.display = d.cart_count > 0 ? 'flex' : 'none';
+            });
+        }
+    });
+}
+function buyNow(productId) {
+    addToCart(productId);
+    setTimeout(()=>{ window.location.href='/order/checkout'; }, 500);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}确认订单 - MZK商城{% endblock %}
+{% block content %}
+<div class="container">
+    <h2 style="padding:12px 0;">📋 确认订单</h2>
+
+    <!-- Address -->
+    <div class="checkout-section">
+        <div class="section-title">📍 收货地址</div>
+        <div style="background:#fff;padding:12px;border-radius:0 0 var(--radius) var(--radius);">
+            {% if addresses %}
+            <div id="address-list">
+                {% for addr in addresses %}
+                <div class="address-card {% if addr.is_default or (not default_address and loop.first) %}selected{% endif %}"
+                     data-addr-id="{{ addr.id }}" onclick="selectAddress(this, {{ addr.id }})">
+                    <div class="addr-header">
+                        <span class="addr-name">{{ addr.receiver_name }}</span>
+                        <span class="addr-phone">{{ addr.phone }}</span>
+                    </div>
+                    <div class="addr-detail">{{ addr.province }}{{ addr.city }}{{ addr.district }} {{ addr.detail }}</div>
+                    {% if addr.is_default %}<span class="addr-tag">默认</span>{% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p style="color:var(--text-muted);padding:8px 0;">请先添加收货地址</p>
+            <a href="/user/addresses" class="btn btn-outline btn-sm">添加地址</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Order Items -->
+    <div class="checkout-section">
+        <div class="section-title">📦 商品信息</div>
+        <div style="background:#fff;padding:0 12px;border-radius:0 0 var(--radius) var(--radius);">
+            {% for item in cart_items %}
+            <div class="order-product" style="padding:10px 0;border-bottom:1px solid var(--border);">
+                <img src="{{ item.product.get_main_image() }}" alt="{{ item.product.name }}">
+                <div style="flex:1;">
+                    <div style="font-size:13px;">{{ item.product.name }}</div>
+                    <div style="color:var(--primary);font-weight:600;">¥{{ '%.2f' % item.product.price }} × {{ item.quantity }}</div>
+                </div>
+                <div style="font-weight:600;">¥{{ '%.2f' % (item.product.price * item.quantity) }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="order-card">
+        <div class="order-header"><strong>💰 费用明细</strong><span>共{{ total_quantity }}件</span></div>
+        <div class="order-summary-row"><span>商品总额</span><span>¥{{ '%.2f' % product_total }}</span></div>
+        <div class="order-summary-row" id="discount-row" style="display:none;"><span>优惠折扣</span><span style="color:var(--success);">-¥<span id="discount-amount">0.00</span></span></div>
+        <div class="order-summary-row"><span>运费</span><span style="color:var(--success);">免运费</span></div>
+        <div class="order-summary-total"><span>应付金额</span><span class="price price-lg" id="pay-amount">¥{{ '%.2f' % product_total }}</span></div>
+    </div>
+
+    <p style="font-size:12px;color:var(--text-muted);margin:8px 0;text-align:center;">💡 支付为模拟支付，点击后直接完成</p>
+
+    <!-- Submit -->
+    <button class="btn btn-primary btn-block btn-lg" onclick="submitOrder()" style="margin-bottom:80px;">
+        💰 提交订单 ¥<span id="btn-pay">{{ '%.2f' % product_total }}</span>
+    </button>
+</div>
+
+<script src="/static/js/order.js"></script>
+<script>
+let selectedAddrId = {{ (default_address.id) if default_address else (addresses[0].id if addresses else 0) }};
+let selectedCouponId = null;
+const productTotal = {{ product_total }};
+
+function selectAddress(el, addrId) {
+    document.querySelectorAll('.address-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedAddrId = addrId;
+}
+
+function submitOrder() {
+    if (!selectedAddrId) { alert('请选择收货地址'); return; }
+    const btn = document.querySelector('.btn-primary.btn-block');
+    btn.disabled = true;
+    btn.textContent = '正在提交...';
+
+    const body = {address_id: selectedAddrId};
+    if (selectedCouponId) body.coupon_id = selectedCouponId;
+
+    fetch('/order/create', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(body)
+    }).then(r=>r.json()).then(d=>{
+        if(d.success){
+            window.location.href = '/order/pay/' + d.order_id;
+        } else {
+            alert(d.message);
+            btn.disabled = false;
+            btn.innerHTML = '💰 提交订单 ¥<span id="btn-pay">{{ "%.2f" % product_total }}</span>';
+        }
+    });
+}
+</script>
+{% endblock %}

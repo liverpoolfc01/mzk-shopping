@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}盲盒 - MZK商城{% endblock %}
+{% block content %}
+<div class="container">
+    <h2 style="padding:12px 0;">🎁 盲盒福袋</h2>
+    {% for box in boxes %}
+    <a href="/blind-box/{{ box.id }}" class="marketing-card" style="display:block;">
+        <div class="card-body" style="text-align:center;padding:24px;">
+            <div class="blind-box-img" style="width:100px;height:100px;margin:0 auto 12px;font-size:36px;">🎁</div>
+            <div class="card-title">{{ box.title }}</div>
+            <div class="card-subtitle">{{ box.description[:50] }}</div>
+            <div class="flex-between" style="max-width:200px;margin:8px auto 0;">
+                <span class="price price-lg">¥{{ '%.2f' % box.price }}</span>
+                <span class="text-sm text-muted">已售{{ box.sold_count }}/{{ box.total_count }}</span>
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+    {% if not boxes %}
+    <div class="card" style="text-align:center;padding:40px;"><p style="font-size:48px;">🎁</p><p class="text-muted">暂无盲盒</p></div>
+    {% endif %}
+</div>
+{% endblock %}

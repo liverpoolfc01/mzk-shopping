@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>{% block title %}MZK商城{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Desktop Header -->
+    <header class="header">
+        <div class="header-inner">
+            <a href="/" class="header-logo">🛒 MZK商城</a>
+            <form class="search-bar" action="/search" method="GET">
+                <input type="text" name="q" placeholder="搜索商品..." value="{{ request.args.get('q', '') }}">
+                <button type="submit">🔍</button>
+            </form>
+            <nav class="header-nav">
+                {% if current_user.is_authenticated %}
+                    <a href="/user/center">{{ current_user.username }}</a>
+                    <a href="/cart" class="cart-badge">
+                        🛒<span class="badge" id="cart-badge">{{ cart_count }}</span>
+                    </a>
+                    <a href="/auth/logout">退出</a>
+                {% else %}
+                    <a href="/auth/login">登录</a>
+                    <a href="/auth/register">注册</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <!-- Flash Messages -->
+    <div class="container" style="margin-top:8px">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Bottom Nav (Mobile) -->
+    <nav class="bottom-nav">
+        <a href="/" class="{% if request.path == '/' %}active{% endif %}">
+            <span class="nav-icon">🏠</span>首页
+        </a>
+        <a href="/products" class="{% if request.path.startswith('/products') %}active{% endif %}">
+            <span class="nav-icon">🏷️</span>分类
+        </a>
+        <a href="/cart" class="{% if request.path == '/cart' %}active{% endif %}">
+            <span class="nav-icon">🛒</span>购物车
+        </a>
+        <a href="/user/center" class="{% if request.path.startswith('/user') %}active{% endif %}">
+            <span class="nav-icon">👤</span>我的
+        </a>
+    </nav>
+
+    <script src="/static/js/main.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

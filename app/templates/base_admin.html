@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MZK商城 - 后台管理{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/admin.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">🛒 MZK管理后台</div>
+            <nav class="sidebar-nav">
+                <a href="/admin" class="{% if request.path == '/admin' %}active{% endif %}">📊 仪表盘</a>
+                <div class="sidebar-section">商品管理</div>
+                <a href="/admin/products" class="{% if '/admin/products' in request.path %}active{% endif %}">📦 商品列表</a>
+                <a href="/admin/products/add" class="{% if '/admin/products/add' in request.path %}active{% endif %}">➕ 添加商品</a>
+                <div class="sidebar-section">订单管理</div>
+                <a href="/admin/orders" class="{% if '/admin/orders' in request.path %}active{% endif %}">📋 订单列表</a>
+                <div class="sidebar-section">用户管理</div>
+                <a href="/admin/users" class="{% if '/admin/users' in request.path %}active{% endif %}">👥 用户列表</a>
+                <div class="sidebar-section">营销管理</div>
+                <a href="/admin/coupons" class="{% if '/admin/coupons' in request.path %}active{% endif %}">🎫 优惠券</a>
+                <a href="/admin/group-buy" class="{% if '/admin/group-buy' in request.path %}active{% endif %}">👥 拼团</a>
+                <a href="/admin/lottery" class="{% if '/admin/lottery' in request.path %}active{% endif %}">🎰 抽奖</a>
+                <a href="/admin/flash-sale" class="{% if '/admin/flash-sale' in request.path %}active{% endif %}">⚡ 秒杀</a>
+                <a href="/admin/bargain" class="{% if '/admin/bargain' in request.path %}active{% endif %}">🔪 砍价</a>
+                <a href="/admin/blind-box" class="{% if '/admin/blind-box' in request.path %}active{% endif %}">🎁 盲盒</a>
+                <div class="sidebar-section"></div>
+                <a href="/">🏠 返回前台</a>
+                <a href="/auth/logout">🚪 退出登录</a>
+            </nav>
+        </aside>
+        <!-- Main -->
+        <div class="admin-main">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/admin.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

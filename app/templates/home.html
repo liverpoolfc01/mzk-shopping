@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}MZK商城 - 品质生活，从这里开始{% endblock %}
+{% block content %}
+<div class="container">
+    <!-- Banner -->
+    <div class="home-banner" style="background:linear-gradient(135deg, #e4393c, #ff6b35);color:#fff;padding:24px 20px;text-align:center;margin-top:10px;">
+        <h2 style="font-size:22px;">🔥 MZK商城 618年中大促</h2>
+        <p style="font-size:14px;margin-top:6px;opacity:0.9;">全场好物低至5折 · 新人专享10元券</p>
+    </div>
+
+    <!-- Categories -->
+    <div class="category-scroll">
+        {% for cat in categories %}
+        <a href="/products?cat={{ cat.id }}" class="category-item">
+            <div class="cat-icon">{{ cat.icon }}</div>
+            <span class="cat-name">{{ cat.name }}</span>
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- Flash Sales -->
+    {% if flash_sales %}
+    <div class="flash-zone">
+        <div class="flash-header">
+            <span class="flash-title">⚡ 限时秒杀</span>
+            <a href="/flash-sale" class="text-sm" style="margin-left:auto;color:var(--primary);">更多 ›</a>
+        </div>
+        <div class="flash-products">
+            {% for fs in flash_sales %}
+            <a href="/products/{{ fs.product_id }}" class="product-card" style="min-width:130px;flex-shrink:0;">
+                <img src="{{ fs.product.get_main_image() }}" class="card-img" alt="{{ fs.product.name }}" style="height:100px;aspect-ratio:auto;">
+                <div class="card-info">
+                    <div class="card-price">¥{{ '%.2f' % fs.flash_price }}</div>
+                    <div class="card-name" style="min-height:auto;font-size:12px;">{{ fs.product.name[:20] }}</div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Recommended Products -->
+    <div style="margin:16px 0;">
+        <h3 style="font-size:16px;margin-bottom:10px;">✨ 精选推荐</h3>
+        <div class="product-grid">
+            {% for product in recommended %}
+            <a href="/products/{{ product.id }}" class="product-card">
+                <img src="{{ product.get_main_image() }}" class="card-img" alt="{{ product.name }}">
+                <div class="card-info">
+                    <div class="card-name">{{ product.name }}</div>
+                    <div class="card-bottom">
+                        <span class="card-price">¥{{ '%.2f' % product.price }}</span>
+                        <span class="card-sold">已售{{ product.sales_count }}</span>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Hot Products -->
+    <div style="margin:16px 0 60px;">
+        <h3 style="font-size:16px;margin-bottom:10px;">🔥 热销排行</h3>
+        <div class="product-grid">
+            {% for product in hot_products %}
+            <a href="/products/{{ product.id }}" class="product-card">
+                <img src="{{ product.get_main_image() }}" class="card-img" alt="{{ product.name }}">
+                <div class="card-info">
+                    <div class="card-name">{{ product.name }}</div>
+                    <div class="card-bottom">
+                        <span class="card-price">¥{{ '%.2f' % product.price }}</span>
+                        <span class="card-sold">已售{{ product.sales_count }}</span>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Marketing Entrance -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:60px;">
+        <a href="/group-buy" class="card" style="text-align:center;padding:16px 8px;">👥<br><span style="font-size:12px;">拼团</span></a>
+        <a href="/lottery" class="card" style="text-align:center;padding:16px 8px;">🎰<br><span style="font-size:12px;">抽奖</span></a>
+        <a href="/flash-sale" class="card" style="text-align:center;padding:16px 8px;">⚡<br><span style="font-size:12px;">秒杀</span></a>
+        <a href="/bargain" class="card" style="text-align:center;padding:16px 8px;">🔪<br><span style="font-size:12px;">砍价</span></a>
+        <a href="/blind-box" class="card" style="text-align:center;padding:16px 8px;">🎁<br><span style="font-size:12px;">盲盒</span></a>
+        <a href="/user/coupons" class="card" style="text-align:center;padding:16px 8px;">🎫<br><span style="font-size:12px;">优惠券</span></a>
+    </div>
+</div>
+{% endblock %}

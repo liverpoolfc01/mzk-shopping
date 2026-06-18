@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}{{ lottery.title }} - MZK商城{% endblock %}
+{% block content %}
+<div class="container" style="text-align:center;">
+    <h2 style="padding:12px 0;">{{ lottery.title }}</h2>
+    <p class="text-muted">{{ lottery.description }}</p>
+    <p class="text-sm text-muted mt-8">时间: {{ lottery.start_time.strftime('%m-%d') }} - {{ lottery.end_time.strftime('%m-%d') }} | 每日{{ lottery.daily_limit }}次</p>
+
+    <div class="lottery-wheel" id="wheel">
+        <button class="lottery-btn" id="draw-btn" onclick="draw()" {% if not can_draw %}disabled style="opacity:0.5"{% endif %}>
+            {% if can_draw %}抽奖{% else %}已用完{% endif %}
+        </button>
+    </div>
+    <p class="text-sm text-muted">今日已抽: {{ daily_count }}/{{ lottery.daily_limit }}</p>
+
+    <div id="result" class="lottery-result" style="display:none;"></div>
+
+    {% if not current_user.is_authenticated %}
+    <a href="/auth/login" class="btn btn-primary mt-16">登录后抽奖</a>
+    {% endif %}
+</div>
+
+<script>
+function draw() {
+    const btn = document.getElementById('draw-btn');
+    btn.disabled = true;
+    btn.textContent = '...';
+    document.getElementById('wheel').style.animation = 'none';
+    document.getElementById('wheel').offsetHeight;
+    document.getElementById('wheel').style.animation = 'pulse 0.3s infinite';
+
+    fetch('/lottery/{{ lottery.id }}/draw', {method:'POST'})
+    .then(r=>r.json()).then(d=>{
+        setTimeout(()=>{
+            document.getElementById('wheel').style.animation = 'pulse 2s infinite';
+            const result = document.getElementById('result');
+            result.style.display = 'block';
+            if(d.is_winner){
+                result.innerHTML = '<div class="card" style="border:2px solid var(--primary);"><div class="card-body"><p style="font-size:48px;">🎉</p><h3>恭喜获得</h3><p class="price price-xl mt-8">'+d.prize_name+'</p></div></div>';
+            } else {
+                result.innerHTML = '<div class="card"><div class="card-body"><p style="font-size:48px;">😅</p><h3>'+d.prize_name+'</h3><p class="text-muted">下次好运！</p></div></div>';
+            }
+            btn.textContent = '已抽';
+        }, 800);
+    });
+}
+</script>
+{% endblock %}

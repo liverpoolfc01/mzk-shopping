@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}我的优惠券 - MZK商城{% endblock %}
+{% block content %}
+<div class="container">
+    <h2 style="padding:12px 0;">🎫 我的优惠券</h2>
+
+    {% if unused %}
+    <h4 style="margin-bottom:8px;">可使用 ({{ unused|length }})</h4>
+    {% for uc in unused %}
+    <div class="coupon-card">
+        <div class="coupon-left">
+            <div class="coupon-value">{% if uc.coupon.type == 'fixed' %}<small>¥</small>{{ '%.0f' % uc.coupon.value }}{% else %}{{ '%.0f' % uc.coupon.value }}<small>%</small>{% endif %}</div>
+            <div style="font-size:11px;">{{ '满%.0f可用' % uc.coupon.min_amount if uc.coupon.min_amount > 0 else '无门槛' }}</div>
+        </div>
+        <div class="coupon-right">
+            <div class="coupon-name">{{ uc.coupon.name }}</div>
+            <div class="coupon-detail">有效期至: {{ uc.expired_at.strftime('%Y-%m-%d') }}</div>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    {% if used %}
+    <h4 style="margin-bottom:8px;">已使用 ({{ used|length }})</h4>
+    {% for uc in used %}
+    <div class="coupon-card used">
+        <div class="coupon-left">
+            <div class="coupon-value">{% if uc.coupon.type == 'fixed' %}<small>¥</small>{{ '%.0f' % uc.coupon.value }}{% else %}{{ '%.0f' % uc.coupon.value }}<small>%</small>{% endif %}</div>
+        </div>
+        <div class="coupon-right">
+            <div class="coupon-name">{{ uc.coupon.name }}</div>
+            <div class="coupon-detail">使用时间: {{ uc.used_at.strftime('%Y-%m-%d') if uc.used_at else '' }}</div>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    {% if not unused and not used %}
+    <div class="card" style="text-align:center;padding:40px;">
+        <p style="font-size:48px;">🎫</p>
+        <p style="color:var(--text-muted);">暂无优惠券</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
